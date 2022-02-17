@@ -10,7 +10,7 @@ import useTheme from './useTheme';
 
 const filterRestyleProps = <
   TRestyleProps,
-  TProps extends Record<string, unknown> & TRestyleProps
+  TProps extends Record<string, unknown> & TRestyleProps,
 >(
   props: TProps,
   omitList: (keyof TRestyleProps)[],
@@ -23,25 +23,20 @@ const filterRestyleProps = <
     {} as Record<keyof TRestyleProps, boolean>,
   );
 
-  return getKeys(props).reduce(
-    (acc, key) => {
-      if (!omittedProp[key as keyof TRestyleProps]) {
-        acc[key] = props[key];
-      }
-      return acc;
-    },
-    {} as TProps,
-  );
+  return getKeys(props).reduce((acc, key) => {
+    if (!omittedProp[key as keyof TRestyleProps]) {
+      acc[key] = props[key];
+    }
+    return acc;
+  }, {} as TProps);
 };
 
 const useRestyle = <
   Theme extends BaseTheme,
   TRestyleProps extends Record<string, any>,
-  TProps extends TRestyleProps & {style?: StyleProp<RNStyle>}
+  TProps extends TRestyleProps & {style?: StyleProp<RNStyle>},
 >(
-  restyleFunctions: (
-    | RestyleFunctionContainer<TProps, Theme>
-    | RestyleFunctionContainer<TProps, Theme>[])[],
+  composedRestyleFunction: any,
   props: TProps,
 ) => {
   const theme = useTheme<Theme>();
@@ -49,7 +44,6 @@ const useRestyle = <
   const dimensions = useDimensions();
 
   const restyled = useMemo(() => {
-    const composedRestyleFunction = composeRestyleFunctions(restyleFunctions);
     const style = composedRestyleFunction.buildStyle(props, {
       theme,
       dimensions,
@@ -60,7 +54,7 @@ const useRestyle = <
     );
     (cleanProps as TProps).style = [style, props.style].filter(Boolean);
     return cleanProps;
-  }, [restyleFunctions, props, dimensions, theme]);
+  }, [composedRestyleFunction, props, dimensions, theme]);
 
   return restyled;
 };
