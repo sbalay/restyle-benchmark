@@ -1,8 +1,7 @@
 import {useMemo} from 'react';
 import {StyleProp} from 'react-native';
 
-import {BaseTheme, RestyleFunctionContainer, RNStyle} from '../types';
-import composeRestyleFunctions from '../composeRestyleFunctions';
+import {BaseTheme, RNStyle} from '../types';
 import {getKeys} from '../typeHelpers';
 
 import useDimensions from './useDimensions';
@@ -13,22 +12,21 @@ const filterRestyleProps = <
   TProps extends Record<string, unknown> & TRestyleProps,
 >(
   props: TProps,
-  omitList: (keyof TRestyleProps)[],
-): Omit<TProps, keyof TRestyleProps> => {
-  const omittedProp = omitList.reduce<Record<keyof TRestyleProps, boolean>>(
-    (acc, prop) => {
-      acc[prop] = true;
-      return acc;
+  omitPropertiesMap: Record<any, boolean>,
+) => {
+  return getKeys(props).reduce(
+    ({cleanProps, restyleProps}, key) => {
+      if (!omitPropertiesMap[key]) {
+        return {cleanProps: {...cleanProps, [key]: props[key]}, restyleProps};
+      } else {
+        return {cleanProps, restyleProps: {...restyleProps, [key]: props[key]}};
+      }
     },
-    {} as Record<keyof TRestyleProps, boolean>,
+    {cleanProps: {}, restyleProps: {}} as {
+      cleanProps: TProps;
+      restyleProps: TRestyleProps;
+    },
   );
-
-  return getKeys(props).reduce((acc, key) => {
-    if (!omittedProp[key as keyof TRestyleProps]) {
-      acc[key] = props[key];
-    }
-    return acc;
-  }, {} as TProps);
 };
 
 const useRestyle = <
@@ -44,15 +42,17 @@ const useRestyle = <
   const dimensions = useDimensions();
 
   const restyled = useMemo(() => {
-    const style = composedRestyleFunction.buildStyle(props, {
+    // console.log('restyled', {props: Object.keys(props)});
+    const {cleanProps, restyleProps} = filterRestyleProps(
+      props,
+      composedRestyleFunction.propertiesMap,
+    );
+    const style = composedRestyleFunction.buildStyle(restyleProps, {
       theme,
       dimensions,
     });
-    const cleanProps = filterRestyleProps(
-      props,
-      composedRestyleFunction.properties,
-    );
-    (cleanProps as TProps).style = [style, props.style].filter(Boolean);
+    cleanProps.style = [style, props.style].filter(Boolean);
+    // (cleanProps as TProps).style = style;
     return cleanProps;
   }, [composedRestyleFunction, props, dimensions, theme]);
 
