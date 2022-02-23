@@ -69,12 +69,15 @@ const RNListItem = ({index}: {index: number}) => {
   );
 };
 
+let totals: number[] = [];
+
 const profilerRenderCallback: ProfilerOnRenderCallback = (
   id,
   phase,
   actualDuration,
 ) => {
   console.log({phase, actualDuration});
+  totals.push(actualDuration);
 };
 
 const list = [...new Array(100)];
@@ -88,14 +91,27 @@ const App = () => {
   const onToggleList = useCallback(() => setIsListRendered(val => !val), []);
   const onToggleRestyle = useCallback(() => toggleRestyleOrRN(val => !val), []);
   const triggerRerender = useCallback(() => setSomeState(val => val + 1), []);
+  const printTotals = useCallback(() => {
+    const sum = totals.reduce((acum, each) => acum + each, 0);
+    console.log({
+      totalTime: sum,
+      average: (sum / totals.length).toFixed(2),
+      updatesCount: totals.length,
+    });
+  }, []);
+  const clearTotals = useCallback(() => {
+    totals = [];
+  }, []);
 
   return (
     <Profiler id="test" onRender={profilerRenderCallback}>
       <ThemeProvider theme={theme}>
         <View style={buttonStyle}>
-          <Button title="TOGGLE DISPLAY" onPress={onToggleList} />
           <Button title="TOGGLE RESTYLE OR RN" onPress={onToggleRestyle} />
+          <Button title="TOGGLE DISPLAY" onPress={onToggleList} />
           <Button title="TRIGGER RERENDER" onPress={triggerRerender} />
+          <Button title="PRINT TOTALS" onPress={printTotals} />
+          <Button title="CLEAR TOTALS" onPress={clearTotals} />
         </View>
         {isListRendered && (
           <ScrollView>
