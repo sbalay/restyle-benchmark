@@ -14,16 +14,16 @@ import theme, {Theme} from './theme';
 const Box = createBox<Theme>();
 const Text = createText<Theme>();
 
-const RestyledListItemChild = React.memo(({index}: {index: number}) => {
-  // const RestyledListItemChild = ({index}: {index: number}) => {
-  console.log('renderedChild ' + index);
+// const RestyledListItemChild = React.memo(({index}: {index: number}) => {
+const RestyledListItemChild = ({index}: {index: number}) => {
+  // console.log('renderedChild ' + index);
   return (
     <Box margin="s">
       <Text>RESTYLE {index} RESTYLE RESTYLE RESTYLE</Text>
     </Box>
   );
-  // };
-});
+};
+// });
 
 const RestyledListItem = ({index}: {index: number}) => {
   return (
