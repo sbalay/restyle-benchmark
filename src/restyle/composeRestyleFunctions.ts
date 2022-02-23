@@ -37,9 +37,6 @@ const composeRestyleFunctions = <
     {} as Record<keyof TProps, true>,
   );
 
-  console.log('properties');
-  console.log(properties);
-
   const funcs = flattenedRestyleFunctions
     .sort(
       (styleFuncA, styleFuncB) =>
@@ -81,8 +78,6 @@ const composeRestyleFunctions = <
     return stylesheet;
     // return {};
   };
-
-  console.log('composing');
 
   return {
     buildStyle,

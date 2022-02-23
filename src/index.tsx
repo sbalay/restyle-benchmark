@@ -14,7 +14,18 @@ import theme, {Theme} from './theme';
 const Box = createBox<Theme>();
 const Text = createText<Theme>();
 
-const RestyledListItem = () => {
+const RestyledListItemChild = React.memo(({index}: {index: number}) => {
+  // const RestyledListItemChild = ({index}: {index: number}) => {
+  console.log('renderedChild ' + index);
+  return (
+    <Box margin="s">
+      <Text>RESTYLE {index} RESTYLE RESTYLE RESTYLE</Text>
+    </Box>
+  );
+  // };
+});
+
+const RestyledListItem = ({index}: {index: number}) => {
   return (
     <Box
       flex={1}
@@ -26,9 +37,7 @@ const RestyledListItem = () => {
         <Box margin="s">
           <Text>- + -</Text>
         </Box>
-        <Box margin="s">
-          <Text>RESTYLE RESTYLE RESTYLE RESTYLE</Text>
-        </Box>
+        <RestyledListItemChild index={index} />
       </Box>
     </Box>
   );
@@ -44,7 +53,8 @@ const parentViewStyle = {
 const row = {flexDirection: 'row'} as const;
 const marginS = {margin: 8};
 
-const RNListItem = () => {
+const RNListItem = ({index}: {index: number}) => {
+  // console.log('renderedChild ' + index);
   return (
     <View style={parentViewStyle}>
       <View style={row}>
@@ -73,9 +83,11 @@ const buttonStyle = {marginTop: 50} as const;
 const App = () => {
   const [isListRendered, setIsListRendered] = useState(true);
   const [restyleToggle, toggleRestyleOrRN] = useState(true);
+  const [, setSomeState] = useState(1);
 
   const onToggleList = useCallback(() => setIsListRendered(val => !val), []);
   const onToggleRestyle = useCallback(() => toggleRestyleOrRN(val => !val), []);
+  const triggerRerender = useCallback(() => setSomeState(val => val + 1), []);
 
   return (
     <Profiler id="test" onRender={profilerRenderCallback}>
@@ -83,14 +95,15 @@ const App = () => {
         <View style={buttonStyle}>
           <Button title="TOGGLE DISPLAY" onPress={onToggleList} />
           <Button title="TOGGLE RESTYLE OR RN" onPress={onToggleRestyle} />
+          <Button title="TRIGGER RERENDER" onPress={triggerRerender} />
         </View>
         {isListRendered && (
           <ScrollView>
             {list.map((_, i) =>
               restyleToggle ? (
-                <RestyledListItem key={i} />
+                <RestyledListItem key={i} index={i} />
               ) : (
-                <RNListItem key={i} />
+                <RNListItem key={i} index={i} />
               ),
             )}
           </ScrollView>
